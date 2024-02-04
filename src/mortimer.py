@@ -22,7 +22,7 @@ async def on_ready():
 @shitsheet.command(name="update", description="Updates your poop counter")
 async def update_shitsheet(ctx):
     if ctx.user.id in BANNED_USERS:
-        ctx.respond("You are BANNED nerd")
+        await ctx.respond("You are BANNED nerd")
         return
 
     db_client.add_shitsheet_entry(ctx.user.id, ctx.user.name)
