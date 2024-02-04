@@ -5,7 +5,7 @@ import os
 
 from src.database_clients.database_client import DatabaseClient
 
-BANNED_USERS = ["272873412571955200"]
+BANNED_USERS = [272873412571955200]
 
 logger = logging.getLogger(__name__)
 db_client = DatabaseClient()
@@ -20,6 +20,7 @@ async def on_ready():
 @bot.command(name="update", description="Updates your poop counter")
 async def update_shitsheet(ctx):
     if ctx.user.id in BANNED_USERS:
+        ctx.respond("You are BANNED nerd")
         return
 
     db_client.add_shitsheet_entry(ctx.user.id, ctx.user.name)
