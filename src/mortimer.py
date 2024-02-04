@@ -13,11 +13,13 @@ db_client = DatabaseClient()
 bot_token = os.getenv("BOT_TOKEN")
 bot = discord.Bot()
 
+shitsheet = bot.create_group("shitsheet", "manage u're poops")
+
 @bot.event
 async def on_ready():
     logger.info(f"{bot.user} is ready")
 
-@bot.command(name="update", description="Updates your poop counter")
+@shitsheet.command(name="update", description="Updates your poop counter")
 async def update_shitsheet(ctx):
     if ctx.user.id in BANNED_USERS:
         ctx.respond("You are BANNED nerd")
