@@ -11,7 +11,7 @@ from src.database_clients.database_client import DatabaseClient
 logger = create_logger(__name__)
 GREENBALD_ID = 217434504372027392
 
-class MortimerStatisticsCog(commands.Cog):
+class BaldCounter(commands.Cog):
     db_client = DatabaseClient()
 
     def __init__(self, bot: discord.Bot):
@@ -20,7 +20,7 @@ class MortimerStatisticsCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        logger.info("MortimerStatisticsCog ready")
+        logger.info("BaldCounter ready")
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -56,4 +56,4 @@ class MortimerStatisticsCog(commands.Cog):
         return buffer
 
 def setup(bot: discord.Bot):
-    bot.add_cog(MortimerStatisticsCog(bot))
+    bot.add_cog(BaldCounter(bot))

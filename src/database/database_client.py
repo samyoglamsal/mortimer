@@ -1,4 +1,3 @@
-from collections.abc import Iterable
 import os
 import sqlite3
 
@@ -15,11 +14,6 @@ class DatabaseClient:
         cur = self.con.cursor()
         res = cur.execute("SELECT * FROM users WHERE id = ?", (id,))
         row = res.fetchone()
-
-        if not row:
-            print(f"User {id} not in table 'users'")
-            raise Exception(f"User {id} not in table 'users'")
-        
         return row
 
     def execute_command(self, command: str, values: tuple | None = None):

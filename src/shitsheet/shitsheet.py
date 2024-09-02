@@ -7,7 +7,7 @@ from src.utils.logging import create_logger
 
 logger = create_logger(__name__)
 
-class ShitsheetCog(commands.Cog):
+class Shitsheet(commands.Cog):
     BANNED_USERS = [272873412571955200]
 
     shitsheet = SlashCommandGroup("shitsheet")
@@ -33,4 +33,4 @@ class ShitsheetCog(commands.Cog):
     
 
 def setup(bot: discord.Bot):
-    bot.add_cog(ShitsheetCog(bot))
+    bot.add_cog(Shitsheet(bot))
