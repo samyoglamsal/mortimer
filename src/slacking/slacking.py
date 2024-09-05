@@ -18,8 +18,9 @@ class Slacking(commands.Cog):
         """
         Checks if the given user should be tracked for slacking.
         """
+        row = self.database_client.get_user_info(id)
 
-        return (self.database_client.get_user_info(id)[2] == 1)
+        return row is not None and (row[2] == 1)
 
     def in_slacking_window(self, message: discord.Message) -> bool:
         """
@@ -50,6 +51,9 @@ class Slacking(commands.Cog):
 
     @slacking_group.command(name="register", description="Start tracking a user for slacking") 
     async def register(self, ctx, user: Option(discord.SlashCommandOptionType.mentionable)) -> None:
+        if ctx.user.id != 217434504372027392:
+            return
+
         add_query = """
         INSERT INTO users (id, name, track_slacking)
         VALUES (?, ?, 1)
@@ -71,10 +75,13 @@ class Slacking(commands.Cog):
         else:
             self.database_client.execute_command(add_query, (user.id, user.name))
 
-        await ctx.respond(f"Tracking {user.name} for slacking")
+        await ctx.respond(f"{user.name} is a registered slacker")
 
     @slacking_group.command(name="unregister", description="Stop tracking a user for slacking")
     async def unregister(self, ctx, user: Option(discord.SlashCommandOptionType.mentionable)) -> None:
+        if ctx.user.id != 217434504372027392:
+            return
+
         update_query = """
         UPDATE users
         SET track_slacking = ?
@@ -96,11 +103,11 @@ class Slacking(commands.Cog):
         now = datetime.now()
         cursor = self.database_client.con.cursor()
 
-        slackers_query = "SELECT * FROM users WHERE track_slacking = 1"
-        slackers: tuple[str, str, int] = cursor.execute(slackers_query).fetchall()
-
         slack_instances_query = "SELECT * FROM slacking"
         slack_instances: tuple[str, datetime] = [(id, datetime.fromisoformat(timestamp)) for id, timestamp in cursor.execute(slack_instances_query).fetchall()]
+
+        slackers_query = "SELECT DISTINCT id FROM slacking"
+        slackers: list[str] = [x[0] for x in cursor.execute(slackers_query).fetchall()]
 
         match duration:
             case "all":
@@ -114,9 +121,9 @@ class Slacking(commands.Cog):
         for slacker in slackers:
             instances = 0
             for datum in data:
-                if datum[0] == slacker[0]:
+                if datum[0] == slacker:
                     instances += 1
-            pairs.append((slacker[1], instances))
+            pairs.append((slacker, instances))
 
 
         buffer = BytesIO()
@@ -134,7 +141,7 @@ class Slacking(commands.Cog):
         if message.author.id == self.bot.application_id:
             return
 
-        if self.is_valid_user(str(message.author.id)) and self.in_slacking_window(message):
+        if self.is_valid_user(str(message.author.id)): # and self.in_slacking_window(message):
             await self.record_slack(message)
 
 def setup(bot: discord.Bot):

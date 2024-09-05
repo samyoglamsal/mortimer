@@ -1,26 +1,43 @@
 import asyncio
 import discord
 import matplotlib.pyplot as plt
+from datetime import datetime
 
 from datetime import timedelta
 from discord.ext import commands
 from io import BytesIO
-from src.utils.logging import create_logger
-from src.database_clients.database_client import DatabaseClient
+from src.database.database_client import DatabaseClient
 
-logger = create_logger(__name__)
 GREENBALD_ID = 217434504372027392
 
 class BaldCounter(commands.Cog):
-    db_client = DatabaseClient()
 
     def __init__(self, bot: discord.Bot):
         self.bot = bot
+        self.db_client = DatabaseClient()
         self.analyzing_greenbald = False
+
+    def add_mortimer_bald_count(self, count: int):
+        cursor = self.db_client.con.cursor()
+
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='mortimer'")
+        if not cursor.fetchone():
+            print(f"Table 'mortimer' does not exist, creating...")
+            cursor.execute("CREATE TABLE mortimer (timestamp TEXT PRIMARY KEY, count INTEGER)")
+    
+        current_time = datetime.now().isoformat()
+        cursor.execute("INSERT INTO mortimer VALUES (?, ?)", (current_time, count))
+        self.db_client.con.commit()
+        print(f"Successfully inserted ({current_time}, {count}) into table mortimer")
+
+    def get_mortimer_bald_counts(self):
+        cursor = self.db_client.con.cursor()
+        cursor.execute("SELECT * FROM mortimer")
+        return cursor.fetchall()
 
     @commands.Cog.listener()
     async def on_ready(self):
-        logger.info("BaldCounter ready")
+        print("BaldCounter ready")
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -42,8 +59,8 @@ class BaldCounter(commands.Cog):
             ):
                 count += 1
 
-        self.db_client.add_mortimer_bald_count(count)
-        data = self.db_client.get_mortimer_bald_counts()
+        self.add_mortimer_bald_count(count)
+        data = self.get_mortimer_bald_counts()
         plot = self.create_plot(data)
         await message.channel.send(file=discord.File(fp=plot, filename="plot.png"))
         self.analyzing_greenbald = False

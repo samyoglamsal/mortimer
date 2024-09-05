@@ -1,7 +1,7 @@
 import os
 import sqlite3
 
-DATABASE_FILE_PATH = os.path.relpath("src/database/files/test.sqlite")
+DATABASE_FILE_PATH = os.path.relpath("src/database/files/db.sqlite")
 
 class DatabaseClient:
     def __init__(self):
